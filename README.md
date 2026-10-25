@@ -19,3 +19,6 @@ Todos os botões de reserva levam a https://wa.me/5573999074679 com mensagem pr�
 - Distância até o aeroporto de Ilhéus (cerca de 70 km) é aproximada.
 - Avaliações: só as notas agregadas, com link para a fonte; nenhum depoimento foi inventado.
 - Não há fotos da praia nem do café da manhã nas fontes públicas usadas.
+
+## Limitações do GitHub Pages
+- Não é possível enviar cabeçalhos HTTP (CSP via header, `frame-ancestors`, `X-Frame-Options`, `Permissions-Policy`). A CSP vai na tag meta; a proteção contra clickjacking (`frame-ancestors`) não funciona via meta.
