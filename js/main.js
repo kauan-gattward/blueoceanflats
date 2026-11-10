@@ -93,15 +93,16 @@ if(car&&ring){
 }
 
 /* lightbox */
-var lb=$('.lb'),lbImg=$('.lb-img'),lbCap=$('.lb-cap'),items=$$('.g-item'),cur_i=0,lastFocus=null,lbOpen=false,pushed=false;
+var lb=$('.lb'),lbImg=$('.lb-img'),lbCap=$('.lb-cap'),allItems=$$('.g-item'),items=allItems,cur_i=0,lastFocus=null,lbOpen=false,pushed=false;
+function groupOf(a){var name=a.getAttribute('data-gallery')||'casa';return allItems.filter(function(x){return (x.getAttribute('data-gallery')||'casa')===name})}
 function preload(i){var a=items[(i+items.length)%items.length];if(a){var im=new Image();im.src=a.getAttribute('href')}}
 function show(i){cur_i=(i+items.length)%items.length;var a=items[cur_i],im=$('img',a);lbImg.src=a.getAttribute('href');lbImg.alt=im.alt;lbImg.width=+a.getAttribute('data-w');lbImg.height=+a.getAttribute('data-h');lbCap.textContent=im.alt+' · '+(cur_i+1)+'/'+items.length;preload(cur_i+1);preload(cur_i-1)}
 function openLb(i){if(lbOpen){show(i);return}lbOpen=true;lastFocus=d.activeElement;show(i);lb.hidden=false;setInert(true);if(nav)nav.setAttribute('inert','');lock();raf(function(){lb.classList.add('show')});$('.lb-close').focus();
  try{history.pushState({lb:1},'');pushed=true}catch(_){pushed=false}}
 function closeLb(fromPop){if(!lbOpen)return;lbOpen=false;lb.classList.remove('show');lb.hidden=true;setInert(false);if(nav)nav.removeAttribute('inert');unlock();if(lastFocus&&lastFocus.focus)lastFocus.focus();
  if(pushed&&!fromPop){pushed=false;try{history.back()}catch(_){}}else pushed=false}
-if(lb&&items.length){
- items.forEach(function(a,i){on(a,'click',function(e){if(e.ctrlKey||e.metaKey||e.shiftKey||e.button===1)return;e.preventDefault();openLb(i)})});
+if(lb&&allItems.length){
+ allItems.forEach(function(a){on(a,'click',function(e){if(e.ctrlKey||e.metaKey||e.shiftKey||e.button===1)return;e.preventDefault();items=groupOf(a);openLb(items.indexOf(a))})});
  on($('.lb-close'),'click',function(){closeLb(false)});on($('.lb-prev'),'click',function(){show(cur_i-1)});on($('.lb-next'),'click',function(){show(cur_i+1)});
  on(lb,'click',function(e){if(e.target===lb||e.target.tagName==='FIGURE')closeLb(false)});
  on(w,'popstate',function(){if(lbOpen)closeLb(true)});
