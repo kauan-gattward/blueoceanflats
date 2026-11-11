@@ -9,10 +9,12 @@ function $$(s,c){return Array.prototype.slice.call((c||d).querySelectorAll(s))}
 function on(el,ev,fn,o){if(el)el.addEventListener(ev,fn,o||false)}
 var raf=w.requestAnimationFrame||function(f){return setTimeout(f,16)};
 
-/* scroll lock (counter so menu + lightbox don't fight) */
-var locks=0;
-function lock(){if(locks++===0)root.classList.add('lock')}
-function unlock(){if(locks>0&&--locks===0)root.classList.remove('lock')}
+/* scroll lock (counter so menu + lightbox don't fight).
+   overflow:hidden alone makes iOS drop the scroll offset and detach position:fixed,
+   so the open menu paints off-screen. Pin the body instead and restore on close. */
+var locks=0,lockedY=0,holdY=null;
+function lock(){if(locks++===0){lockedY=w.pageYOffset||root.scrollTop||0;holdY=lockedY;root.style.setProperty('--lock-y','-'+lockedY+'px');root.classList.add('lock')}}
+function unlock(){if(locks>0&&--locks===0){var y=lockedY;holdY=y;root.classList.remove('lock');root.style.removeProperty('--lock-y');var prev=root.style.scrollBehavior;root.style.scrollBehavior='auto';w.scrollTo(0,y);root.style.scrollBehavior=prev;holdY=null}}
 /* make background inert while a modal layer is open */
 var bg=$$('main, footer, .wa-float, .skip');
 function setInert(v){bg.forEach(function(el){if(v){el.setAttribute('inert','');el.setAttribute('aria-hidden','true')}else{el.removeAttribute('inert');el.removeAttribute('aria-hidden')}})}
@@ -35,8 +37,9 @@ else rev.forEach(function(el){el.classList.add('in')});
 
 /* nav + menu */
 var nav=$('.nav'),btn=$('.menu-btn'),menu=$('#menu'),menuOpen=false;
-function closeMenu(focus){if(!menuOpen)return;menuOpen=false;menu.classList.remove('open');btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-label','Abrir menu');setInert(false);unlock();if(focus)btn.focus()}
-function openMenu(){if(menuOpen)return;menuOpen=true;menu.classList.add('open');btn.setAttribute('aria-expanded','true');btn.setAttribute('aria-label','Fechar menu');setInert(true);lock();var f=$('a',menu);if(f)setTimeout(function(){f.focus()},50)}
+function focusEl(el){if(el&&el.focus){try{el.focus({preventScroll:true})}catch(err){el.focus()}}}
+function closeMenu(focus){if(!menuOpen)return;menuOpen=false;menu.classList.remove('open');btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-label','Abrir menu');setInert(false);unlock();if(focus)focusEl(btn)}
+function openMenu(){if(menuOpen)return;menuOpen=true;menu.classList.add('open');btn.setAttribute('aria-expanded','true');btn.setAttribute('aria-label','Fechar menu');setInert(true);lock();var f=$('a',menu);if(f)setTimeout(function(){focusEl(f)},50)}
 if(btn&&menu){
  on(btn,'click',function(){menuOpen?closeMenu(true):openMenu()});
  $$('a',menu).forEach(function(a){on(a,'click',function(){closeMenu(false)})});
@@ -46,7 +49,7 @@ if(btn&&menu){
 
 /* scroll effects */
 var heroMedia=$('.hero-media'),par=$$('.parallax'),ticking=false,mx=0,my=0;
-function frame(){ticking=false;var sy=w.pageYOffset,vh=w.innerHeight;if(nav)nav.classList.toggle('scrolled',sy>40);if(reduce)return;
+function frame(){ticking=false;var sy=holdY!==null?holdY:(w.pageYOffset||0),vh=w.innerHeight;if(nav)nav.classList.toggle('scrolled',sy>40);if(reduce||holdY!==null)return;
  if(heroMedia&&sy<vh*1.2)heroMedia.style.transform='translate3d('+(mx*-14)+'px,'+(sy*0.3+my*-10)+'px,0) rotateX('+(my*2)+'deg) rotateY('+(mx*-2)+'deg)';
  for(var i=0;i<par.length;i++){var r=par[i].getBoundingClientRect();if(r.bottom<-200||r.top>vh+200)continue;par[i].style.transform='translate3d(0,'+((r.top+r.height/2-vh/2)*parseFloat(par[i].getAttribute('data-speed')||0)).toFixed(1)+'px,0)'}}
 function req(){if(!ticking){ticking=true;raf(frame)}}
@@ -71,6 +74,7 @@ var car=$('.carousel'),ring=$('.ring');
 if(car&&ring){
  var cards=$$('.c-card',ring);cards.forEach(function(c){c.style.setProperty('--i',c.getAttribute('data-i'))});
  var n=cards.length,step=360/n,idx=0,rot=0,z=420,status=$('#c-status'),drag=null,auto=null,moved=false;
+ ring.style.setProperty('--step',step+'deg');
  var titles=cards.map(function(c){var s=$('strong',c);return s?s.textContent:''});
  var tz=function(){var cw=cards[0].offsetWidth||300;z=Math.round((cw/2)/Math.tan(Math.PI/n))+40;cards.forEach(function(c){c.style.setProperty('--tz',z+'px')});car.style.perspective=(z*3.4)+'px'};
  var apply=function(){ring.style.transform='translateZ(-'+z+'px) rotateY('+rot+'deg)'};
