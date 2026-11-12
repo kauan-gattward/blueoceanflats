@@ -82,7 +82,10 @@ section{padding:clamp(4.5rem,12vw,9rem) 0}
 .room{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);overflow:hidden;transform-style:preserve-3d;transition:transform .5s var(--ease),box-shadow .5s}
 .room:not(:has(.room-img)){align-self:start}
 .room:hover{box-shadow:0 40px 70px -30px rgba(0,0,0,.7)}
-.room-img{aspect-ratio:4/3;overflow:hidden}.room-img img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}.room:hover .room-img img{transform:scale(1.07)}
+.room-img{aspect-ratio:4/3;overflow:hidden;position:relative}.room-img img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}.room:hover .room-img img{transform:scale(1.07)}
+.room-img .g-item{position:absolute;inset:0;margin:0;border-radius:0}
+.room-img .g-item img{height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+.room:hover .room-img .g-item img{transform:scale(1.07);filter:none}
 .room-body{padding:1.4rem 1.5rem 1.6rem;transform:translateZ(30px)}.room-body h3{font-size:1.8rem;margin-bottom:.3em}.room-body p{color:#c3d5d8;margin:.3rem 0;font-size:.95rem}
 .room-meta{font-size:.72rem!important;letter-spacing:.18em;text-transform:uppercase;color:var(--foam)!important}
 .room-price{font:400 1.3rem var(--ff)!important;color:var(--sun)!important;margin-top:1rem!important}.room-price small{font:400 .8rem var(--fs);color:var(--mut)}
